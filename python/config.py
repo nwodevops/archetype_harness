@@ -22,7 +22,7 @@ VAR_RE = re.compile(r"\$\{([A-Za-z0-9_]+)\}")
 CONNECTION_PREFIX = {
     "oracle_sisud": "DB_ORA_SISUD",      # fuente F5 (vista multas)
     "oracle_BD_CURSOR": "DB_ORA_REPO",   # alias histórico / repo
-    "oracle_dw": "DB_ORA_DW",            # destino DW (APP / REPOCSEP)
+    "oracle_dw": "DB_ORA_DW",            # destino DW; esquema en DB_ORA_DW_SCHEMA
     "h2": "DB_H2",                       # staging in-memory
 }
 
