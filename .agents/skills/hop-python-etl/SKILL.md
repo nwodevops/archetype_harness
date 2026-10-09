@@ -2,6 +2,7 @@
 name: hop-python-etl
 description: >-
   Arquetipo Apache Hop + H2 in-memory STG_* + Python post-staging.
+  Prioridad: Hop mueve las filas; Python es segundo (DDL y reglas).
   inputs.yaml, create_stg.py, wf_create_stg/wf_main, logica/ aislada,
   project-config.json. Usar al clonar el cascarón, añadir fuentes STG,
   cablear workflows o depurar Hop/H2/Python.
@@ -31,12 +32,16 @@ Fuentes (Excel / Sheets / Oracle / lo que declare inputs.yaml)
 
 **Contrato:** `python/CONTRATO.md`. **Staging:** [reference.md](reference.md).
 
-## Cuándo Hop solo vs Python
+## Prioridad: Hop, después Python
 
-- **Hop solo:** 1 fuente → 1 destino, mapeo 1:1.
-- **Python:** homologación, calidad, joins, dimensional, indicadores.
+Apache Hop mueve las filas. Python no las extrae ni las carga.
 
-Un solo `.py` en `logica/` (auto-descubierto por `python/main.py`). Entrada = claves de `LECTURAS` en `python/io/leer_h2.py`. Salida = DataFrame `RESULTADO`.
+| Orden | Quién | Qué |
+|---|---|---|
+| 1 | Hop | Extract, truncate, insert. Sheets, Excel, Oracle, H2. Mapeo 1:1 de punta a punta (`pl_stage_*` y, si el destino es Oracle, `pl_ora_*`). |
+| 2 | Python | Solo DDL (`create_stg.py`, `create_ora.py`) y reglas que un pipeline no debe resolver: homologación, calidad, joins, dimensional, indicadores. |
+
+Un mapeo 1:1 no pasa por `logica/` ni por `python/main.py`. Si hace falta lógica, un solo `.py` en `logica/` (auto-descubierto por `python/main.py`). Entrada = claves de `LECTURAS` en `python/io/leer_h2.py`. Salida = DataFrame `RESULTADO`.
 
 ## Workflows
 
@@ -57,8 +62,8 @@ Smoke sin Hop:
 1. Entrada en `inputs.yaml` ([inputs.example.yaml](inputs.example.yaml)).
 2. Play `wf_create_stg` → crear `pipelines/pl_stage_*.hpl`.
 3. Cablear en `wf_main.hwf` **después** de Python create STG.
-4. Clave en `python/io/leer_h2.py` → `LECTURAS`.
-5. Lógica en `logica/` (no conexiones). Borrar `demo.py` al pasar a lógica real.
+4. Mapeo 1:1: pipeline Hop hasta el destino. No añadas `logica/`.
+5. Si hay reglas: clave en `python/io/leer_h2.py` → `LECTURAS`, un `.py` en `logica/` (sin conexiones). Borrar `demo.py`.
 6. Actualizar `python/CONTRATO.md` y `AGENTS.md`.
 
 ## Variables y conexiones
