@@ -27,8 +27,9 @@ flowchart TB
 |---|---|
 | `inputs.yaml` | Declara fuentes → tablas `STG_*` |
 | `create_stg.py` | DDL H2 (sin filas) |
-| Hop | Extract → H2 |
-| `logica/` | Reglas de negocio (un `.py`) |
+| Hop | Mueve las filas (extract, truncate, insert), también 1:1 hasta Oracle |
+| Python | Segundo: DDL y reglas. Un mapeo 1:1 no pasa por `logica/` |
+| `logica/` | Reglas de negocio (un `.py`), solo si Hop no alcanza |
 | H2 | Staging efímero (reset cada corrida) |
 
 ## Workflows
