@@ -2,7 +2,7 @@
 name: hop-python-etl
 description: >-
   Arquetipo Apache Hop + H2 in-memory STG_* + Python post-staging.
-  Prioridad: Hop mueve las filas; Python es segundo (DDL y reglas).
+  Prioridad: Hop mueve las filas. Tema complejo: Python en logica/ es obligatorio.
   inputs.yaml, create_stg.py, wf_create_stg/wf_main, logica/ aislada,
   project-config.json. Usar al clonar el cascarón, añadir fuentes STG,
   cablear workflows o depurar Hop/H2/Python.
@@ -34,14 +34,15 @@ Fuentes (Excel / Sheets / Oracle / lo que declare inputs.yaml)
 
 ## Prioridad: Hop, después Python
 
-Apache Hop mueve las filas. Python no las extrae ni las carga.
+Hop mueve las filas. Python entra cuando el problema ya no es un copia 1:1.
 
-| Orden | Quién | Qué |
-|---|---|---|
-| 1 | Hop | Extract, truncate, insert. Sheets, Excel, Oracle, H2. Mapeo 1:1 de punta a punta (`pl_stage_*` y, si el destino es Oracle, `pl_ora_*`). |
-| 2 | Python | Solo DDL (`create_stg.py`, `create_ora.py`) y reglas que un pipeline no debe resolver: homologación, calidad, joins, dimensional, indicadores. |
+| Caso | Quién |
+|---|---|
+| Extract, truncate, insert. Sheets, Excel, Oracle, H2. Mapeo 1:1 (`pl_stage_*` y, si el destino es Oracle, `pl_ora_*`). | Hop |
+| DDL de landing (`create_stg.py`, `create_ora.py`). | Python, sin filas |
+| Tema complejo: homologación, calidad, joins, varias fuentes, dimensional, indicadores, reglas que un pipeline no debe resolver. | Python obligatorio, en `logica/` |
 
-Un mapeo 1:1 no pasa por `logica/` ni por `python/main.py`. Si hace falta lógica, un solo `.py` en `logica/` (auto-descubierto por `python/main.py`). Entrada = claves de `LECTURAS` en `python/io/leer_h2.py`. Salida = DataFrame `RESULTADO`.
+Un mapeo 1:1 no pasa por `logica/` ni por `python/main.py`. En un tema complejo, un solo `.py` en `logica/` (auto-descubierto por `python/main.py`). Entrada = claves de `LECTURAS` en `python/io/leer_h2.py`. Salida = DataFrame `RESULTADO`. Hop sigue siendo quien dejó las `STG_*` llenas. `logica/` no abre conexiones.
 
 ## Workflows
 
@@ -63,7 +64,7 @@ Smoke sin Hop:
 2. Play `wf_create_stg` → crear `pipelines/pl_stage_*.hpl`.
 3. Cablear en `wf_main.hwf` **después** de Python create STG.
 4. Mapeo 1:1: pipeline Hop hasta el destino. No añadas `logica/`.
-5. Si hay reglas: clave en `python/io/leer_h2.py` → `LECTURAS`, un `.py` en `logica/` (sin conexiones). Borrar `demo.py`.
+5. Tema complejo: clave en `python/io/leer_h2.py` → `LECTURAS`, un `.py` en `logica/` (sin conexiones). Borrar `demo.py`. Hop ya cargó las `STG_*`.
 6. Actualizar `python/CONTRATO.md` y `AGENTS.md`.
 
 ## Variables y conexiones
