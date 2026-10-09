@@ -46,7 +46,7 @@ Host, servicio y esquema no van en este archivo. Viven en `environments/local.js
 
 ## Reglas críticas
 
-1. **Prioridad:** Apache Hop mueve las filas. Python es segundo: DDL y reglas (joins, calidad, indicadores). Un mapeo 1:1 no pasa por `logica/`.
+1. **Prioridad:** Apache Hop mueve las filas. Un mapeo 1:1 no pasa por `logica/`. Un tema complejo (joins, calidad, varias fuentes, dimensional, indicadores) sí usa Python en `logica/`.
 2. **Un solo `.py`** en `logica/` (el cascarón trae `demo.py`).
 3. **Sin secretos** en git (`project-config.json` es generado).
 4. **Sin `${VAR}` literal** en logs Hop = variable mal definida.
@@ -56,4 +56,4 @@ Host, servicio y esquema no van en este archivo. Viven en `environments/local.js
 
 ## Nuevo proyecto
 
-Este repo es un cascarón. Fuentes → `inputs.yaml`. Filas → pipelines Hop. Python solo crea el DDL. `logica/<tu>.py` entra cuando el mapeo deja de ser 1:1. Destino demo del cascarón → Excel.
+Este repo es un cascarón. Fuentes → `inputs.yaml`. Filas → pipelines Hop. `logica/<tu>.py` es obligatorio cuando el tema es complejo. Destino demo del cascarón → Excel.
